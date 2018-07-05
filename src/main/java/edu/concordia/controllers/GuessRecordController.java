@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
  * Created by Asif Mahbub on 6/29/2018.
  */
 @RestController
-@CrossOrigin
 @RequestMapping("/api")
 public class GuessRecordController {
     @Autowired
