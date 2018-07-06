@@ -11,6 +11,9 @@ import java.util.stream.Collectors;
 /**
  * Created by Asif Mahbub on 6/29/2018.
  */
+
+
+@CrossOrigin
 @RestController
 @RequestMapping("/api")
 public class GuessRecordController {
@@ -155,6 +158,12 @@ public class GuessRecordController {
                 .collect(Collectors.toList());
         return distinctUsers;
     }
+
+    @GetMapping("/totaldb")
+    public List<Guess> database(){
+        return repo.findAll();
+    }
+
 
     @PostMapping("/guess")
     public void saveGuessRecord(@RequestBody Guess record){
