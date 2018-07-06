@@ -53,6 +53,7 @@ public class GuessRecordController {
 
         for (String userId:
              guessesByUserEachSession.keySet()) {
+            timeSpentInMins = 0;
             Map<String, List<Guess>> guessBySession = guessesByUserEachSession.get(userId);
             for (String sessions:
                  guessBySession.keySet()) {
@@ -104,6 +105,55 @@ public class GuessRecordController {
         }
         return  usersAndSessionTimeSpent;
 
+    }
+
+    @GetMapping("/guessTimeAverage")
+    public List<UserAverageTimeSpent> getUserTimeSpentAverage(){
+        List<Guess> guesses = repo.findAll();
+
+        Map<String, Map<String, List<Guess>>> guessesByUserEachSession = guesses
+                .stream()
+                .collect(Collectors.groupingBy(Guess::getUserID,Collectors.groupingBy(Guess::getSessionID)));
+
+        //     System.out.println(guessesByUserEachSession);
+        Comparator<Guess> comparator = new TimeStampComarator();
+        List<UserAverageTimeSpent> userAverageTimeSpents = new ArrayList<>();
+        int timeSpentInMins = 0;
+
+
+        for (String userId:
+                guessesByUserEachSession.keySet()) {
+            timeSpentInMins = 0;
+            Map<String, List<Guess>> guessBySession = guessesByUserEachSession.get(userId);
+            for (String sessions:
+                    guessBySession.keySet()) {
+                List<Guess> guesses1 = guessBySession.get(sessions);
+                Guess max = Collections.max(guesses1,comparator);
+                Guess min = Collections.min(guesses1,comparator);
+                int timeSpent = (int) ((max.getTimestamp().getTime()-min.getTimestamp().getTime())/60000);
+                timeSpentInMins+=timeSpent;
+//                System.out.println(max.getTimestamp().toString());
+//                System.out.println(min.getTimestamp().toString());
+//                System.out.println("time spent: "+ timeSpent);
+//
+//                System.out.println(userId+" "+sessions+" "+"no of memo: "+guesses1.size());
+            }
+            userAverageTimeSpents.add(new UserAverageTimeSpent(userId,timeSpentInMins/guessBySession.keySet().size()));
+        }
+        // System.out.println("total Time spent: "+timeSpentInMins);
+        return  userAverageTimeSpents;
+
+    }
+
+    @GetMapping("/distinctUsers")
+    public List<String> distinctUsers(){
+        List<Guess> guesses = repo.findAll();
+        List<String> distinctUsers = guesses
+                .stream()
+                .map(Guess::getUserID)
+                .distinct()
+                .collect(Collectors.toList());
+        return distinctUsers;
     }
 
     @PostMapping("/guess")
